@@ -95,7 +95,7 @@ def create_shape(
     response = requests.post(url_shapes, headers=headers, json=payload)
     if response.status_code != 201:
         raise Exception(f"Error creating shape: {response.text}")
-    return response.json()
+    return response.json().get("id")
 
     # Option 2: Using miro_api
     # api = miro_api.MiroApi(ACCESS_TOKEN)
@@ -104,7 +104,7 @@ def create_shape(
     #     shape_create_request=payload,
     # )
 
-def create_connector(source_id, target_id, caption=None, font_size=14,color="#1a1a1a", shape="elbowed"):
+def create_connector(source_id, target_id, caption=None, font_size=14, color="#1a1a1a", shape="elbowed"):
     """
     Create a connection (line/arrow) between two objects on the Miro board.
     docs: https://developers.miro.com/reference/create-connector
@@ -124,6 +124,7 @@ def create_connector(source_id, target_id, caption=None, font_size=14,color="#1a
             "strokeColor": color,
             "strokeStyle": "normal",
             "fontSize": font_size,
+            "endStrokeCap": "none",
         },
         "shape": shape,  # "elbowed" or "straight",
         "captions": [
