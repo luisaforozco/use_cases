@@ -58,5 +58,3 @@ This project orchestrates use case exploration and visualization by integrating 
 - Ensure your `ACCESS_TOKEN` is valid and not expired.
 - If you see authentication errors, re-generate your token and re-export it.
 - Check the console output for error messages from the Miro API.
-
-

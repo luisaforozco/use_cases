@@ -6,15 +6,6 @@ from useCaseOrch.use_case_utils import extract_person_months, get_impact_score, 
 # --- CONFIG ---
 EXCEL_FILE = "../Use case collection template.xlsx"
 SHEET = 'New Template GenAI'
-IMPACT_LEVELS = {
-    'team': 0.0,
-    'department': 0.166,
-    'division': 0.333,
-    'unit': 0.5,
-    'tno': 0.666,
-    'industry': 0.833,
-    'society': 1.0
-}
 COLORS_STICKY_NOTES_MIRO = ['gray', 'light_yellow', 'yellow', 'orange', 'light_green', 'green', 'dark_green', 'cyan', 'light_pink', 'pink', 'violet', 'red', 'light_blue', 'blue', 'dark_blue', 'black']
 COLORS_HEX = [
     '#000000', '#0000ff', '#8a2be2', '#a52a2a', '#5f9ea0', '#d2691e', '#4b0082',
@@ -33,27 +24,24 @@ df = df.drop(df.columns[0], axis=1) # drop first merged colum
 df.index = df.iloc[:, 0] # index will be the now first column
 df = df.drop(df.columns[0], axis=1)
 
-# pre-processing Impact and Effort
+# --- Pre-processing impact & effort --- 
 df = df.rename(index={
         'Impact (team-department-division-unit-TNO-Industry-Society)': 'impact',
         'Effort (total time)': 'effort' 
         })
 df.loc['effort'] = df.loc['effort'].map(extract_person_months)
+df.loc['impact'] = df.loc['impact'].map(get_impact_score)
 
-#df['impact'] = df['impact'].apply(get_impact_score)
-# mocking test
-df.loc['impact', :] = [0.0, 0.0, 0.333, 0.833, 0.833, 0.9165, 0.5, 0.5, 0.166, 0.0]
-
-# --- Coloring use cases by projects ---
-df.loc['Color'] = extract_subcategory_cluster(df.loc['Project'])
-df.loc['Color'] = df.loc['Color'].map(lambda x: COLORS_STICKY_NOTES_MIRO[x % len(COLORS_STICKY_NOTES_MIRO)])
-
-# --- Positioning for Impact vs Effort --- 
+# Positioning in Miro board
 effort = df.loc['effort']
 effort_min = effort.min()
 effort_max = effort.max()
 df.loc['x'] = ((effort - effort_min) / (effort_max - effort_min)) * SCALE
 df.loc['y'] = df.loc['impact'] * SCALE  # impact [0, 1] scale to [0, SCALE]
+
+# --- Coloring use cases by projects ---
+df.loc['Color'] = extract_subcategory_cluster(df.loc['Project'])
+df.loc['Color'] = df.loc['Color'].map(lambda x: COLORS_STICKY_NOTES_MIRO[x % len(COLORS_STICKY_NOTES_MIRO)])
 
 # --- Create sticky notes in Miro ---
 for i, (use_case, col) in enumerate(df.items()):

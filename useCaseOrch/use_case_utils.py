@@ -1,17 +1,28 @@
 import numpy as np
 import pandas as pd
 
+IMPACT_LEVELS = {
+    'team': 0.0,
+    'department': 0.166,
+    'division': 0.333,
+    'unit': 0.5,
+    'tno': 0.666,
+    'industry': 0.833,
+    'society': 1.0
+}
+
 def extract_person_months(entry):
     try:
         return float(entry.split()[0])
     except:
         return np.nan  # or use a default value like 0
 
-def get_impact_score(text, openai):
+def get_impact_score_LLM(text):
     prompt = f"""
     Given the following impact description: "{text}"
     Map it to a numerical score between 0 and 1 based on these levels:
     team (0.0), department (0.166), division (0.333), unit (0.5), TNO (0.666), industry (0.833), society (1.0).
+    If the description is unclear and cannot be classified in any of the levels, return 0.0.
     Return only the number.
     """
     response = openai.ChatCompletion.create(
@@ -19,6 +30,16 @@ def get_impact_score(text, openai):
         messages=[{"role": "user", "content": prompt}]
     )
     return float(response['choices'][0]['message']['content'])
+
+def get_impact_score(text):
+    """
+    Maps an impact description to a numerical score based on all matching keywords.
+    Returns the average score based on keywords found, or 0.0 if none found.
+    """
+    matches = [score for key, score in IMPACT_LEVELS.items() if key in text.lower()]
+    if matches:
+        return np.mean(matches)
+    return 0.0 
 
 def extract_subcategory_cluster(series):
     """
