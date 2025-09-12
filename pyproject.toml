@@ -1,5 +1,5 @@
 [project]
-name = "use_case_orchestration"
+name = "useCaseOrch"
 version = "0.1.0"
 description = "Orchestrate use case exploration and visualization with Miro integration."
 authors = [
@@ -9,12 +9,12 @@ requires-python = ">=3.9"
 dependencies = [
     "pandas>=1.5",
     "numpy>=1.21",
-    "openai>=1.0",
     "requests>=2.28"
 ]
 
 [tool.setuptools]
-packages = ["miro"]
+package-dir = {"useCaseOrch" = "useCaseOrch"}
+packages = ["useCaseOrch"]
 
 [build-system]
 requires = ["setuptools>=61.0"]
