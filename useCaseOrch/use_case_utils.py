@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import ollama
 
 IMPACT_LEVELS = {
     'team': 0.0,
@@ -11,13 +12,22 @@ IMPACT_LEVELS = {
     'society': 1.0
 }
 
+SOLUTION_CATEGORIES_GEN_AI = [
+    "GEN AI INDEXING",
+    "GEN AI ASSISTANTS",
+    "GEN AI AGENTS",
+    "GEN AI COPILOTS",
+    "GEN AI PRE-PROCESSING",
+    "GEN AI MODELER",
+]
+
 def extract_person_months(entry):
     try:
         return float(entry.split()[0])
     except:
         return np.nan  # or use a default value like 0
 
-def get_impact_score_LLM(text):
+def get_impact_score_LLM(text, llm_model="llama3.1:8b"):
     prompt = f"""
     Given the following impact description: "{text}"
     Map it to a numerical score between 0 and 1 based on these levels:
@@ -25,11 +35,11 @@ def get_impact_score_LLM(text):
     If the description is unclear and cannot be classified in any of the levels, return 0.0.
     Return only the number.
     """
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}]
+    resp = ollama.generate(
+        model=llm_model,
+        prompt=prompt
     )
-    return float(response['choices'][0]['message']['content'])
+    return float(resp['response'])
 
 def get_impact_score(text):
     """
@@ -40,6 +50,21 @@ def get_impact_score(text):
     if matches:
         return np.mean(matches)
     return 0.0 
+
+def assign_solution_category(text_solution, text_solution_subcategory, llm_model="llama3.1:8b"):
+    prompt = f"""
+    Given the solution description: "{text_solution}"
+    and the subcategory description: "{text_solution_subcategory}"
+    Assign the most appropriate category from the following list:
+    {SOLUTION_CATEGORIES_GEN_AI}.
+    Return the names of the categories exactly as in the list, separated by commas.
+    If none of the categories fit, return and empty string.
+    """
+    resp = ollama.generate(
+        model=llm_model,
+        prompt=prompt
+    )
+    return [cat.strip() for cat in resp['response'].split(',') if cat.strip()]
 
 def extract_subcategory_cluster(series):
     """
