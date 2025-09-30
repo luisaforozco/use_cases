@@ -33,7 +33,7 @@ def get_impact_score_LLM(text, llm_model="llama3.1:8b"):
     Map it to a numerical score between 0 and 1 based on these levels:
     team (0.0), department (0.166), division (0.333), unit (0.5), TNO (0.666), industry (0.833), society (1.0).
     If the description is unclear and cannot be classified in any of the levels, return 0.0.
-    Return only the number.
+    Respond ONLY the number, no other text.
     """
     resp = ollama.generate(
         model=llm_model,

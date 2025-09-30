@@ -1,3 +1,4 @@
 env.sh
 *.xsls
 __pycache__/
+data/*.pkl

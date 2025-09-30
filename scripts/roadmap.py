@@ -5,10 +5,10 @@
 import pandas as pd
 
 from useCaseOrch import miro
-from useCaseOrch.use_case_utils import extract_person_months, get_impact_score, extract_subcategory_cluster, get_connections_by_subcategory
+from useCaseOrch.use_case_utils import extract_person_months, get_impact_score, extract_subcategory_cluster, get_connections_by_subcategory, get_impact_score_LLM
 
 # --- CONFIG ---
-EXCEL_FILE = "../Use case collection template.xlsx"
+EXCEL_FILE = "Use case collection template.xlsx"
 SHEET = 'New Template GenAI'
 COLORS_STICKY_NOTES_MIRO = ['gray', 'light_yellow', 'yellow', 'orange', 'light_green', 'green', 'dark_green', 'cyan', 'light_pink', 'pink', 'violet', 'red', 'light_blue', 'blue', 'dark_blue', 'black']
 COLORS_HEX = [
@@ -22,8 +22,7 @@ COLORS_HEX = [
 ]
 SCALE = 1000
 
-if __name__ == "__main__":
-    # --- Load Data ---
+def load_and_preprocess_data():
     df = pd.read_excel(EXCEL_FILE, sheet_name=SHEET)
     df = df.drop(df.columns[0], axis=1) # drop first merged colum
     df.index = df.iloc[:, 0] # index will be the now first column
@@ -35,7 +34,19 @@ if __name__ == "__main__":
             'Effort (total time)': 'effort' 
             })
     df.loc['effort'] = df.loc['effort'].map(extract_person_months)
-    df.loc['impact'] = df.loc['impact'].map(get_impact_score)
+    df.loc['impact'] = df.loc['impact'].map(get_impact_score_LLM)
+
+    # export processed data for future use
+    df.to_pickle(f"data/{EXCEL_FILE}_{SHEET}.pkl")
+    return df
+
+if __name__ == "__main__":
+    # --- Load Data ---
+    try: # if there is a previously processed file, load it
+        df = pd.read_pickle(f"data/{EXCEL_FILE}_{SHEET}.pkl")
+        print(f"Loaded processed data from {EXCEL_FILE}_{SHEET}.pkl")
+    except:
+        df = load_and_preprocess_data()
 
     # Positioning in Miro board
     effort = df.loc['effort']
@@ -64,5 +75,5 @@ if __name__ == "__main__":
     # --- Add Connectors based on 'Solution subcategory' ---
     connections = get_connections_by_subcategory(df, subcat_row='Solution subcategory')
     for idx, (u1, u2, subcat) in enumerate(connections):
-        print(f"{u1} <-> {u2} via '{subcat}'")
+        #print(f"{u1} <-> {u2} via '{subcat}'") # uncomment to debug
         id_connector = miro.create_connector(u1, u2, caption=subcat, font_size=10, color=COLORS_HEX[idx % len(COLORS_HEX)])

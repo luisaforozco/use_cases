@@ -1,14 +1,11 @@
-
-
-# Use Case Orchestration with Miro Integration
+# Use Case Orchestration processing and visualization
 
 This project orchestrates use case exploration and visualization by integrating with the [Miro REST API](https://developers.miro.com/reference/overview). It processes a use case database (Excel file) and programmatically creates elements (sticky notes, shapes) and connectors on a Miro board.
 
 ## Features
 
 - Reads use case data from an Excel template.
-- Automatically creates sticky notes or shapes for each use case on a Miro board.
-- Positions notes in the space impact vs effort (calculated via functionality of this package).
+- Creates sticky notes or shapes for each use case on a Miro board, positioned in the space impact vs effort (calculated via functionality of this package).
 - Colors notes by project (can be defined).
 - Adds connectors between use cases based on solution subcategories (or any other entry).
 - Uses the official [Miro REST API](https://developers.miro.com/reference/overview).
@@ -58,3 +55,4 @@ This project orchestrates use case exploration and visualization by integrating 
 - Ensure your `ACCESS_TOKEN` is valid and not expired.
 - If you see authentication errors, re-generate your token and re-export it.
 - Check the console output for error messages from the Miro API.
+- Put the right path to the excel template containing the data.
